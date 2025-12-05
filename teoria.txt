@@ -1,0 +1,51 @@
+A técnica de Eigenfaces é um método de reconhecimento e análise de faces baseado em ferramentas fundamentais de Álgebra Linear, especialmente autovalores, autovetores e decomposições matriciais. A ideia central é representar rostos não como simples imagens em alta dimensão, mas como combinações lineares de autovetores de uma matriz de covariância. Esses autovetores — chamados de eigenfaces — capturam padrões essenciais de variação entre diferentes rostos.
+
+O processo começa com a organização das imagens em uma matriz de dados. Cada imagem, originalmente bidimensional, é convertida em um vetor coluna ao ser “achatada” (flatten) em uma dimensão. Se cada imagem possui H×W pixels, cada vetor está em R^HW. Reunindo n imagens, obtemos uma matriz X∈R^n×HW, onde cada linha representa uma imagem. O primeiro passo matemático é calcular a média de todas as imagens:
+
+	n
+μ=1/n * ∑ xi
+       i=1
+
+Em seguida, centralizamos o conjunto de dados subtraindo essa média de cada imagem:
+
+x~i= xi − μ
+
+A centralização é essencial, pois elimina deslocamentos globais e garante que a análise de variância reflita somente diferenças estruturais entre os rostos.
+
+O objetivo das eigenfaces é encontrar um subespaço de baixa dimensão que capture as direções de maior variabilidade entre as imagens. Na prática, buscamos os autovetores da matriz de covariância dos dados. A matriz de covariância completa seria
+
+C = X⊤X ∈ R^HW×HW,
+
+
+mas como HW costuma ser muito grande (por exemplo, 4096 no Olivetti Faces), calcular diretamente seus autovetores é computacionalmente inviável. A solução clássica, proposta por Turk e Pentland (1991), é observar que os autovetores relevantes de C podem ser obtidos a partir da matriz reduzida
+
+L = XX⊤ ∈ R^n×n
+
+cuja dimensão depende do número de imagens, não do número de pixels. Após resolver o problema
+
+Lv=λv,
+
+convertemos cada autovetor reduzido v em uma eigenface multiplicando por X⊤
+
+u = X⊤v
+
+Cada vetor u obtido dessa forma é então normalizado, tornando-se efetivamente uma eigenface: um vetor que pode ser reformatado como imagem. Essas eigenfaces formam uma base ortonormal para o subespaço de maior variância do conjunto de rostos.
+
+Uma característica importante é que as eigenfaces correspondem aos padrões mais significativos de variação do dataset: iluminação, formato do rosto, orientação da cabeça, distinção de características, etc. Os autovalores associados a cada eigenface indicam a “quantidade de variância” capturada por aquela direção. Ordenando os autovalores em ordem decrescente, obtemos as eigenfaces mais relevantes primeiro. A soma acumulada dos autovalores permite determinar quantas componentes são suficientes para representar bem as imagens, muitas vezes usando apenas uma fração da dimensionalidade original.
+
+A projeção de um rosto no subespaço das eigenfaces é dada por
+
+w=Uk⊤(x−μ)
+
+onde Uk contém as k primeiras eigenfaces como colunas. O vetor w é chamado de assinatura da face, pois codifica a imagem usando poucos coeficientes. A reconstrução aproximada é obtida pela combinação linear das eigenfaces escolhidas:
+
+x^=U_kw + μ
+
+
+Quando k é suficientemente grande, a reconstrução é visualmente muito próxima da imagem original; quando k é pequeno, apenas os traços gerais do rosto permanecem.
+
+A aplicação mais clássica desse método é o reconhecimento facial via comparação de assinaturas. Duas imagens são consideradas semelhantes quando seus vetores projetados estão próximos no subespaço PCA, frequentemente medidos via distância euclidiana. Assim, as eigenfaces permitem representar rostos em um espaço de baixa dimensão, preservando características discriminativas e reduzindo ruído.
+
+Do ponto de vista matemático, o método das eigenfaces é fundamentalmente uma aplicação de Análise de Componentes Principais (PCA), uma técnica central em Álgebra Linear numérica e estatística multivariada. Seu poder advém da capacidade de transformar um problema originalmente de alta dimensionalidade em um conjunto de direções principais que explicam a maior parte da variabilidade dos dados. A interpretação geométrica também é clara: estamos projetando cada rosto em um subespaço de dimensão reduzida que melhor se ajusta ao conjunto de imagens no sentido dos mínimos quadrados.
+
+Em resumo, o método das eigenfaces demonstra como autovalores e autovetores de matrizes de covariância podem ser utilizados para extrair estrutura de dados complexos como imagens. Ele evidencia a relação profunda entre álgebra linear, compressão, reconhecimento de padrões e visão computacional. Além disso, oferece uma ferramenta poderosa para visualizar, reconstruir e classificar rostos em formatos que seriam impraticáveis de lidar diretamente no espaço original de pixels.
