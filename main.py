@@ -1,9 +1,52 @@
 from datasets import carregar_dataset
 from preprocess import preprocessar
-from eigenfaces import calcular_pca, projetar_imagem, reconstruir_imagem, variancia_explicada, gerar_face_sintetica, gerar_varias_faces, interpolar_entre_faces
-from facial_morphing import morphing_facial
+from eigenfaces import calcular_pca, projetar_imagem, reconstruir_imagem, gerar_face_sintetica, interpolar_entre_faces, plot_erro_reconstrucao_por_k
 import matplotlib.pyplot as plt
 import numpy as np
+
+def plotar_eigenfaces(eigenfaces, shape, n=None):
+    """
+    Plota as eigenfaces do dataset.
+
+    eigenfaces: matriz (d, m) sendo cada coluna uma eigenface.
+    n: quantidade de eigenfaces a exibir (default = todas)
+    """
+    H, W = shape
+    total = eigenfaces.shape[1]
+
+    if n is None or n > total:
+        n = total
+
+    cols = 10
+    rows = int(np.ceil(n / cols))
+
+    plt.figure(figsize=(12, 1.2 * rows))
+
+    for i in range(n):
+        plt.subplot(rows, cols, i + 1)
+        face = eigenfaces[:, i].reshape(H, W)
+        plt.imshow(face, cmap="gray")
+        plt.title(f"PC {i+1}")
+        plt.axis("off")
+
+    plt.suptitle("Eigenfaces", fontsize=16)
+    plt.tight_layout()
+    plt.show()
+
+def plotar_face_media(media, shape):
+    """
+    Plota a face média (mean face) do dataset.
+    """
+    H, W = shape
+    mean_img = media.reshape(H, W)
+
+    plt.figure(figsize=(4, 4))
+    plt.imshow(mean_img, cmap="gray")
+    plt.title("Mean Face (Face Média)")
+    plt.axis("off")
+    plt.show()
+
+
 
 # escolha do dataset
 # images, X_flat, shape = carregar_dataset("olivetti")
@@ -16,11 +59,13 @@ Xc, media, shape = preprocessar(images)
 eigenfaces, autovalores = calcular_pca(Xc)
 
 # escolher número de componentes
-k = 40
+k = 20
+
+plotar_eigenfaces(eigenfaces,shape)
 
 """
 # projetar 1 imagem
-i = 0
+i = 31
 w = projetar_imagem(X_flat[i], media, eigenfaces, k)
 
 # reconstruir
@@ -39,9 +84,11 @@ plt.title(f"Reconstrução (k={k})")
 plt.axis("off")
 
 plt.show()
-"""
 
+erros = plot_erro_reconstrucao_por_k(X_flat, media, eigenfaces, shape, idx_img=i)
 #"""
+
+"""
 # gerar 1 rosto sintético
 face_flat = gerar_face_sintetica(media, eigenfaces, autovalores, k)
 face_img = face_flat.reshape(shape)
@@ -50,12 +97,12 @@ plt.imshow(face_img, cmap="gray")
 plt.title("Face Sintética Gerada")
 plt.axis("off")
 plt.show()
-#"""
+"""
 
 """
 # escolher duas imagens do dataset
-A_id = 39
-B_id = 45
+A_id = 36
+B_id = 49
 
 A = X_flat[A_id]
 B = X_flat[B_id]
@@ -89,32 +136,7 @@ plt.tight_layout()
 plt.show()
 """
 
-"""
-imgA = images[20]
-imgB = images[14]
 
-
-frames = morphing_facial(imgA, imgB, media, eigenfaces, k=60, n_passos=9)
-
-
-plt.figure(figsize=(6, 3))
-plt.subplot(1, 2, 1)
-plt.title("Imagem A (inicial)")
-plt.imshow(imgA, cmap="gray")
-plt.axis("off")
-
-plt.subplot(1, 2, 2)
-plt.title("Imagem B (final)")
-plt.imshow(imgB, cmap="gray")
-plt.axis("off")
-
-plt.figure(figsize=(10,2))
-for i,f in enumerate(frames):
-    plt.subplot(1,10,i+1)
-    plt.imshow(f, cmap="gray")
-    plt.axis("off")
-plt.show()
-"""
 
 
 
@@ -127,7 +149,7 @@ A_id = 6
 wA = projetar_imagem(X_flat[A_id], media, eigenfaces, round(k/2))
 wA2 = np.pad(wA, (0,round(k/2)), mode='constant', constant_values=0)
 
-B_id = 54
+B_id = 0
 wB1 = projetar_imagem(X_flat[B_id], media, eigenfaces, k)
 wB2 = projetar_imagem(X_flat[B_id], media, eigenfaces, round(k/2))
 wB22 = np.pad(wB2, (0,round(k/2)), mode='constant', constant_values=0)
@@ -159,3 +181,4 @@ plt.axis("off")
 
 plt.show()
 """
+

@@ -1,5 +1,6 @@
 # eigenfaces.py
 import numpy as np
+import matplotlib.pyplot as plt
 
 def calcular_pca(X_centralizado):
     """
@@ -105,3 +106,42 @@ def interpolar_entre_faces(imgA_flat, imgB_flat, media, eigenfaces, k, n_passos=
         interpolacoes.append(img_t)
 
     return np.array(interpolacoes)
+
+def plot_erro_reconstrucao_por_k(X_flat, media, eigenfaces, shape, idx_img):
+    """
+    Plota o erro ||x - x_k|| para k = 1 até o máximo possível.
+    X_flat: matriz (n_amostras, d)
+    media: vetor (d,)
+    eigenfaces: matriz (d, d) ou (d, n_comp)
+    shape: tupla de reshape
+    idx_img: índice da imagem que será reconstruída
+    """
+
+    x = X_flat[idx_img]        # imagem original (flatten)
+    d = eigenfaces.shape[1]    # número máximo de componentes possíveis
+
+    erros = []
+
+    for k in range(1, d + 1):
+        # projeção em k componentes
+        w_k = projetar_imagem(x, media, eigenfaces, k)
+
+        # reconstrução
+        rec_k = reconstruir_imagem(w_k, media, eigenfaces, k)
+
+        # erro na norma 2
+        erro = np.linalg.norm(x - rec_k)
+        erros.append(erro)
+
+    # --- plot ---
+    plt.figure(figsize=(8,4))
+    plt.plot(range(1, d+1), erros, marker="o")
+    plt.xlabel("Número de componentes principais (k)")
+    plt.ylabel("Erro de reconstrução ||x − x_k||")
+    plt.title(f"Erro de reconstrução para a imagem {idx_img}")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+    return erros
+
